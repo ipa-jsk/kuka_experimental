@@ -115,7 +115,8 @@ private:
 
   // Interfaces
   hardware_interface::JointStateInterface joint_state_interface_;
-  hardware_interface::PositionJointInterface position_joint_interface_;
+  //hardware_interface::PositionJointInterface position_joint_interface_;
+  hardware_interface::VelocityJointInterface velocity_joint_interface_;
 
 public:
 

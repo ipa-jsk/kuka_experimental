@@ -75,7 +75,7 @@ IF (ret <> RSIOK) THEN
 ENDIF
 
 ; Start RSI execution
-ret = RSI_ON(#ABSOLUTE)
+ret = RSI_ON(#RELATIVE)
 IF (ret <> RSIOK) THEN
   HALT
 ENDIF
