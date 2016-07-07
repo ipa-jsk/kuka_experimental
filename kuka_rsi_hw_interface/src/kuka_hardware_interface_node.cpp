@@ -71,18 +71,19 @@ int main(int argc, char** argv)
     // Receive current state from robot
     if (!kuka_rsi_hw_interface.read(timestamp, period))
     {
-      ROS_FATAL_NAMED("kuka_hardware_interface", "Failed to read state from robot. Shutting down!");
-      ros::shutdown();
-    }
+      ROS_ERROR_NAMED("kuka_hardware_interface", "Failed to read state from robot. Reconnecting!");
+      kuka_rsi_hw_interface.start();
+      ros_now = ros::Time::now();
+    } else {
 
-    // Get current time and elapsed time since last read
-    timestamp = ros::Time::now();
+      // Get current time and elapsed time since last read
+      timestamp = ros::Time::now();
 
-    // Update the controllers
-    controller_manager.update(timestamp, period);
+      // Update the controllers
+      controller_manager.update(timestamp, period);
 
-    // Send new setpoint to robot
-    kuka_rsi_hw_interface.write(timestamp, period);
+      // Send new setpoint to robot
+      kuka_rsi_hw_interface.write(timestamp, period);
   }
 
   spinner.stop();
