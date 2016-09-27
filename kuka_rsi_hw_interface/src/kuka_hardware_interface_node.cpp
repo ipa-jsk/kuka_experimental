@@ -61,29 +61,24 @@ int main(int argc, char** argv)
 
   kuka_rsi_hw_interface.start();
 
-  // Get current time and elapsed time since last read
-  timestamp = ros::Time::now();
-
   // Run as fast as possible
   while (ros::ok())
-  //while (!g_quit)
   {
+    // Get current time and elapsed time since last read
+    timestamp = ros::Time::now();
+
     // Receive current state from robot
     if (!kuka_rsi_hw_interface.read(timestamp, period))
     {
       ROS_ERROR_NAMED("kuka_hardware_interface", "Failed to read state from robot. Reconnecting!");
       kuka_rsi_hw_interface.start();
-      ros_now = ros::Time::now();
     } else {
-
-      // Get current time and elapsed time since last read
-      timestamp = ros::Time::now();
-
       // Update the controllers
       controller_manager.update(timestamp, period);
 
       // Send new setpoint to robot
       kuka_rsi_hw_interface.write(timestamp, period);
+    }
   }
 
   spinner.stop();
