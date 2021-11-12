@@ -49,7 +49,7 @@ class RSICommand
 {
 public:
   RSICommand();
-  RSICommand(std::vector<double> position_corrections, unsigned long long ipoc);
+  RSICommand(std::vector<double> position_corrections, unsigned long long ipoc, std::map<std::string, std::map<std::string, std::string>> add_rsi_elements);
   std::string xml_doc;
 };
 
@@ -58,7 +58,7 @@ RSICommand::RSICommand()
   // Intentionally empty
 }
 
-RSICommand::RSICommand(std::vector<double> joint_position_correction, unsigned long long ipoc)
+RSICommand::RSICommand(std::vector<double> joint_position_correction, unsigned long long ipoc, std::map<std::string, std::map<std::string, std::string>> add_rsi_elements)
 {
   TiXmlDocument doc;
   TiXmlElement* root = new TiXmlElement("Sen");
@@ -76,6 +76,17 @@ RSICommand::RSICommand(std::vector<double> joint_position_correction, unsigned l
   el = new TiXmlElement("IPOC");
   el->LinkEndChild(new TiXmlText(std::to_string(ipoc)));
   root->LinkEndChild(el);
+
+  for (auto& element : add_rsi_elements)
+  {
+      el = new TiXmlElement(element.first);
+      for (auto &namevaluepair : element.second)
+      {
+          el->SetAttribute(namevaluepair.first, namevaluepair.second);
+      }
+      root->LinkEndChild(el);
+  }
+
   doc.LinkEndChild(root);
   TiXmlPrinter printer;
   printer.SetStreamPrinting();

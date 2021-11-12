@@ -122,7 +122,7 @@ bool KukaHardwareInterface::write(const ros::Time time, const ros::Duration peri
     rsi_joint_position_corrections_[i] = (RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i];
   }
 
-  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_).xml_doc;
+  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, add_rsi_elements_).xml_doc;
   server_->send(out_buffer_);
 
   return true;
@@ -151,7 +151,7 @@ void KukaHardwareInterface::start()
     rsi_initial_joint_positions_[i] = rsi_state_.initial_positions[i];
   }
   ipoc_ = rsi_state_.ipoc;
-  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_).xml_doc;
+  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, add_rsi_elements_).xml_doc;
   server_->send(out_buffer_);
   // Set receive timeout to 1 second
   server_->set_timeout(1000);
@@ -177,6 +177,16 @@ void KukaHardwareInterface::configure()
     throw std::runtime_error(msg);
   }
   rt_rsi_pub_.reset(new realtime_tools::RealtimePublisher<std_msgs::String>(nh_, "rsi_xml_doc", 3));
+
+  sub_add_rsi_elements_ = nh_.subscribe("add_rsi_elements", 1, &KukaHardwareInterface::add_rsi_element_callback, this);
+}
+
+void KukaHardwareInterface::add_rsi_element_callback(const kuka_rsi_messages::RSIElement& msg)
+{
+    for (int i = 0; i < msg.names.size(); i++)
+    {
+        add_rsi_elements_[msg.element][msg.names[i]] = msg.values[i];
+    }
 }
 
 } // namespace kuka_rsi_hardware_interface

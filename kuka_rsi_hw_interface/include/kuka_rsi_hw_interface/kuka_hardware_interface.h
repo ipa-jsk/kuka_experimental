@@ -65,6 +65,7 @@
 // RSI
 #include <kuka_rsi_hw_interface/rsi_state.h>
 #include <kuka_rsi_hw_interface/rsi_command.h>
+#include <kuka_rsi_messages/RSIElement.h>
 
 namespace kuka_rsi_hw_interface
 {
@@ -117,8 +118,11 @@ private:
   hardware_interface::JointStateInterface joint_state_interface_;
   hardware_interface::PositionJointInterface position_joint_interface_;
 
-public:
+  ros::Subscriber sub_add_rsi_elements_;
 
+  std::map<std::string, std::map<std::string, std::string>> add_rsi_elements_;
+
+  public:
   KukaHardwareInterface();
   ~KukaHardwareInterface();
 
@@ -127,6 +131,7 @@ public:
   bool read(const ros::Time time, const ros::Duration period);
   bool write(const ros::Time time, const ros::Duration period);
 
+  void add_rsi_element_callback(const kuka_rsi_messages::RSIElement& msg);
 };
 
 } // namespace kuka_rsi_hw_interface
