@@ -61,27 +61,24 @@ DECL INT CONTID	; ContainerID
   ;ENDFOLD (BASISTECH INI)
   ;FOLD USER INI
     ;Make your modifications here
-
+    INTERRUPT DECL 10 WHEN $FLAG[1]==TRUE DO RSI_REINIT()
+    INTERRUPT ON 10
   ;ENDFOLD (USER INI)
 ;ENDFOLD (INI)
 
-; Move to start position
-PTP {A1 0, A2 -90, A3 90, A4 0, A5 90, A6 0}
+; Fake SAK
+PTP $POS_ACT
 
-; Create RSI Context
-ret = RSI_CREATE("ros_rsi",CONTID,TRUE)
-IF (ret <> RSIOK) THEN
-  HALT
-ENDIF
+RSI_REINIT()
 
-; Start RSI execution
-ret = RSI_ON(#RELATIVE)
-IF (ret <> RSIOK) THEN
-  HALT
-ENDIF
-
-; Sensor guided movement
-RSI_MOVECORR()
+;LOOP
+  ; Activate Sensor guided movement
+  RSI_MOVECORR()
+;FOLD OUT 1 '' State=TRUE CONT;%{PE}%R 8.2.24,%MKUKATPBASIS,%COUT,%VOUTX,%P 2:1, 3:, 5:TRUE, 6:CONTINUE
+CONTINUE
+$OUT[1]=TRUE
+;ENDFOLD
+;ENDLOOP
 
 ; Turn off RSI
 ret = RSI_OFF()
@@ -89,6 +86,55 @@ IF (ret <> RSIOK) THEN
   HALT
 ENDIF
 
-PTP {A1 0, A2 -90, A3 90, A4 0, A5 90, A6 0}
+END
 
+DEF RSI_REINIT()
+;FOLD Declaration
+DECL INT RSI_RET ; Return value for RSI commands
+DECL INT CONTID ; ContainerID
+;ENDFOLD
+;FOLD Close RSI Connection
+RSI_RET = RSI_OFF()
+IF (RSI_RET <> RSIOK) THEN
+  HALT
+ENDIF
+;ENDFOLD
+;FOLD RSI Init
+; RSI Module must run before continue
+; Create RSI Context
+RSI_RET = RSI_CREATE("ros_rsi.rsi",CONTID,TRUE)
+IF (RSI_RET <> RSIOK) THEN
+	SWITCH RSI_RET
+		 Case RSIFILENOTFOUND
+			HALT
+	   Case RSIINVFILE
+			HALT
+		 Case RSINOMEMORY
+			HALT
+	;  Case RSIINVOBJTYPE
+	 ;    HALT
+	   Case RSIEXTLIBNOTFOUND
+			HALT
+	   Case RSINOTLINKED
+			HALT
+	   Case RSILNKCIRCLE
+			HALT
+	   DEFAULT
+			HALT
+	ENDSWITCH
+ENDIF
+
+; Start RSI execution
+  ; Start RSI modulev
+  ; for relative movements use #RELATIVE
+  ; for absolute movements use #ABSOLUTE
+  ; #IPO=12ms, #IPO_FAST=4ms
+  RSI_RET = RSI_ON(#RELATIVE,#IPO_FAST)
+  ; RSI_RET = RSI_ON(#RELATIVE,#IPO,#TCP)
+  IF (RSI_RET <> RSIOK) THEN
+    ; RSI was already on! Press to continue!
+    HALT
+  ENDIF
+  ;RESUME
+;ENDFOLD
 END
