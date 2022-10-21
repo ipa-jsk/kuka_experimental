@@ -116,3 +116,5 @@ Choose **controller manager ns** and **controller** and you should be able to mo
 
 * Note that T1-mode limits the robot movement velocity and is intended for testing purposes.
 
+## FAQ
+* "Command gear torque A6" (or A1..5) -> wrong or missing tool configuration
