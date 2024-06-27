@@ -6,7 +6,7 @@ This guide highlights the steps needed in order to successfully configure the **
 
 Windows runs behind the SmartHMI on the teach pad. Make sure that the **Windows interface** of the controller and the **PC with ROS** is connected to the same subnet.
 
-1. Log in as **Expert** or **Administrator** on the teach pad and navigate to **Network configuration** (**Start-up > Network configuration > Activate advanced configuration**).
+1. Log in as **Expert** or **Administrator** in **T1** mode on the teach pad and navigate to **Network configuration** (**Start-up > Network configuration > Activate advanced configuration**).
 2. There should already be an interface checked out as the **Windows interface**. For example:
    * **IP**: 192.168.250.20
    * **Subnet mask**: 255.255.255.0
@@ -28,7 +28,11 @@ If your **PC** has an IP address on the same subnet as the **Windows interface**
 
 ## 2. KRL Files
 
-The files included in this folder specifies the data transferred via RSI. Some of the files needs to be modified to work for your specific configuration.
+The files included in this folder specifies the data transferred via RSI. Some of the files needs to be modified to work for your specific configuration. 
+
+##### Find out your RSI version with KUKA smart pad
+1. Go to: Main menu -> help -> documentation -> robot sensor interface
+2. Info is located at the bottom of the screen
 
 ##### ros_rsi_ethernet.xml
 1. Edit the `IP_NUMBER` tag so that it corresponds to the IP address (192.168.1.xx) previously added for your PC.
@@ -54,7 +58,12 @@ This does not need to be edited.
 ##### Copy files to controller
 The files **ros_rsi.rsi** and **ros_rsi.rsi.diagram** should not be edited. All files are now ready to be copied to the Kuka controller:
 
-1. Copy the files to a USB-stick.
+1. Copy the following files to a USB-stick.
+   - ros_rsi_ethernet.xml
+   - ros_rsi.rsi.xml for RSI 3.x OR ros_rsi.rsix for RSI 4.x
+   - ros_rsi.src
+   - ros_rsi.rsi
+   - ros_rsi.rsi.diagram
 2. Plug it into the teach pad or controller.
 3. Log in as **Expert** or **Administrator**.
 4. Copy the respective `RSIX/ros_rsi.src` file to `KRC:\R1\Program`.
@@ -100,13 +109,12 @@ $ roslaunch kuka_rsi_hw_interface test_hardware_interface.launch sim:=false
 
 The **kuka_rsi_hardware_interface** is now waiting for the robot controller to connect. Follow the next steps to connect RSI:
 
-1. On the teach pad, enter mode **T1** for testing purposes.
-2. Navigate to `KRC:\R1\Program` and select `ros_rsi.src`.
-3. Press and hold an enabling switch and the run/play-button. The robot will first move to the start position.
+1. Navigate to `KRC:\R1\Program` and select `ros_rsi.src`.
+2. Press and hold an enabling switch and the run/play-button. The robot will first move to the start position.
    * A message like **Programmed path reached (BCO)** will be shown at the teach pad.
-4. Press and hold again. The teach pad will post a warning **!!! Attention - Sensor correction goes active !!!**.
-5. Confirm the warning and press and hold the buttons again. This time the terminal where **kuka_rsi_hardware_interface** is running should output **Got connection from robot**. The RSI connection is now up and running.
-6. In a new terminal:
+3. Press and hold again. The teach pad will post a warning **!!! Attention - Sensor correction goes active !!!**.
+4. Confirm the warning and press and hold the buttons again. This time the terminal where **kuka_rsi_hardware_interface** is running should output **Got connection from robot**. The RSI connection is now up and running.
+5. In a new terminal:
 
 ```
 $ rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
@@ -114,7 +122,7 @@ $ rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
 Choose **controller manager ns** and **controller** and you should be able to move each robot joint.
 
-* Note that T1-mode limits the robot movement velocity and is intended for testing purposes.
+* Note that T1-mode is recommended as it limits the robot movement velocity and is intended for testing purposes.
 
 ## FAQ
-* "Command gear torque A6" (or A1..5) -> wrong or missing tool configuration
+* "Command gear torque A6" (or A1..5) -> wrong or missing tool configuration 
